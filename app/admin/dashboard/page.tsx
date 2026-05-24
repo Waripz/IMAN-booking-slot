@@ -26,7 +26,7 @@ export default function AdminDashboardPage() {
   const [filterDate, setFilterDate] = useState('')
   const [filterSlot, setFilterSlot] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [lang] = useState<'ms' | 'en'>('ms')
+  const [lang] = useState<'ms' | 'en'>('en')
 
   const eventDates = getEventDates()
 
@@ -134,7 +134,7 @@ export default function AdminDashboardPage() {
         <div className="nav-actions">
           <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Admin</span>
           <button className="btn btn-ghost" onClick={handleLogout}>
-            Log Keluar
+            Logout
           </button>
         </div>
       </nav>
