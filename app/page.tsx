@@ -172,7 +172,6 @@ export default function Home() {
           <button className="lang-toggle" onClick={() => setLang(l => l === 'ms' ? 'en' : 'ms')}>
             {tx.langSwitch}
           </button>
-          <a href="/admin" className="btn btn-ghost">{tx.adminLogin}</a>
         </div>
       </nav>
 
