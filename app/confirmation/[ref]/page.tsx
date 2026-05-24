@@ -23,6 +23,7 @@ export default function ConfirmationPage() {
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
   const [lang, setLang] = useState<'ms' | 'en'>('ms')
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     async function fetchBooking() {
@@ -41,9 +42,29 @@ export default function ConfirmationPage() {
     fetchBooking()
   }, [ref])
 
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  const confirmUrl = `${siteUrl}/confirmation/${ref}`
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(confirmUrl)}`
+  const qrData = ref
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=000000&margin=2`
+
+  const handleDownloadQR = async () => {
+    setDownloading(true)
+    try {
+      const response = await fetch(qrUrl)
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `IMAN-QR-${ref}.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      // Fallback: open in new tab
+      window.open(qrUrl, '_blank')
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -65,7 +86,11 @@ export default function ConfirmationPage() {
         <div className="confirmation-container">
           <div className="glass-card">
             <div className="empty-state">
-              <div className="empty-state-icon">🔍</div>
+              <div className="empty-state-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+              </div>
               <h2>{lang === 'ms' ? 'Tempahan tidak dijumpai' : 'Booking not found'}</h2>
               <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>
                 {lang === 'ms' ? 'Rujukan tidak sah atau telah tamat tempoh.' : 'Invalid reference or booking expired.'}
@@ -92,7 +117,11 @@ export default function ConfirmationPage() {
       <div className="confirmation-container fade-in">
         <div className="glass-card glass-card-glow">
           {/* Success Icon */}
-          <div className="confirmation-icon">✓</div>
+          <div className="confirmation-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
 
           <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700 }}>
             {lang === 'ms' ? 'Tempahan Berjaya!' : 'Booking Confirmed!'}
@@ -104,21 +133,27 @@ export default function ConfirmationPage() {
           {/* Booking Reference */}
           <div className="confirmation-ref">{booking.booking_ref}</div>
 
-          {/* QR Code */}
-          <div style={{ margin: '24px 0' }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: 12 }}>
-              {lang === 'ms' ? '📱 Tunjukkan QR ini semasa kehadiran' : '📱 Show this QR code at entry'}
+          {/* QR Code - Prominent */}
+          <div style={{ margin: '28px 0', textAlign: 'center' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+              </svg>
+              {lang === 'ms' ? 'Tunjukkan QR ini semasa kehadiran' : 'Show this QR code at entry'}
             </p>
-            <div className="qr-container">
+            <div className="qr-container" style={{ padding: 16, borderRadius: 16 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={qrUrl}
                 alt="QR Code"
-                width={200}
-                height={200}
+                width={250}
+                height={250}
                 style={{ display: 'block' }}
               />
             </div>
+            <p style={{ color: 'var(--warning)', fontSize: '0.8rem', marginTop: 12, fontWeight: 500 }}>
+              {lang === 'ms' ? 'Sila screenshot atau muat turun QR ini' : 'Please screenshot or download this QR'}
+            </p>
           </div>
 
           {/* Booking Details */}
@@ -151,11 +186,20 @@ export default function ConfirmationPage() {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 12, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <a href={qrUrl} download={`IMAN-QR-${booking.booking_ref}.png`} className="btn btn-secondary">
-              📥 {lang === 'ms' ? 'Muat turun QR' : 'Download QR'}
-            </a>
+            <button className="btn btn-primary" onClick={handleDownloadQR} disabled={downloading}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              {downloading
+                ? (lang === 'ms' ? 'Memuat turun...' : 'Downloading...')
+                : (lang === 'ms' ? 'Muat turun QR' : 'Download QR')
+              }
+            </button>
             <a href="/" className="btn btn-ghost">
-              ← {lang === 'ms' ? 'Kembali' : 'Back Home'}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+              {lang === 'ms' ? 'Kembali' : 'Back Home'}
             </a>
           </div>
         </div>

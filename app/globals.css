@@ -981,3 +981,40 @@ select.form-input option {
   font-size: 3rem;
   margin-bottom: 16px;
 }
+
+/* ---- Scanner ---- */
+.scanner-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.checkin-status {
+  padding: 24px;
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+}
+
+.checkin-success {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.checkin-warning {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.checkin-error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+#qr-reader {
+  border: 2px solid var(--glass-border) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+#qr-reader video {
+  border-radius: var(--radius-md) !important;
+}
+

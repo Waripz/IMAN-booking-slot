@@ -20,6 +20,8 @@ CREATE TABLE bookings (
   umur INTEGER NOT NULL,
   daerah TEXT NOT NULL,
   negeri TEXT NOT NULL,
+  checked_in BOOLEAN DEFAULT FALSE,
+  checked_in_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   
   UNIQUE(email, event_date)
