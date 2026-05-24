@@ -25,7 +25,7 @@ export default function AdminDashboardPage() {
   const supabase = createClient()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<'table' | 'tally' | 'scanner'>('table')
+  const [view, setView] = useState<'table' | 'tally' | 'scanner' | 'checked'>('table')
   const [filterDate, setFilterDate] = useState('')
   const [filterSlot, setFilterSlot] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -180,12 +180,54 @@ export default function AdminDashboardPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
             Scanner
           </button>
+          <button className={`btn btn-sm ${view === 'checked' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setView('checked')}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+            Checked In
+          </button>
         </div>
       </div>
 
       {/* Content */}
       {view === 'scanner' ? (
         <ScannerView />
+      ) : view === 'checked' ? (
+        <div className="glass-card fade-in">
+          <h3 style={{ fontFamily: 'var(--font-heading)', marginBottom: 16 }}>Checked In ({bookings.filter(b => b.checked_in).length})</h3>
+          {bookings.filter(b => b.checked_in).length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+              </div>
+              <p>No one checked in yet</p>
+            </div>
+          ) : (
+            <div className="table-container" style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th><th>Ref</th><th>Name</th><th>Date</th><th>Time</th><th>Phone</th><th>Checked In At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bookings
+                    .filter(b => b.checked_in)
+                    .sort((a, b) => new Date(b.checked_in_at || '').getTime() - new Date(a.checked_in_at || '').getTime())
+                    .map((b, i) => (
+                      <tr key={b.id}>
+                        <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
+                        <td><span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--accent)', fontSize: '0.8rem' }}>{b.booking_ref}</span></td>
+                        <td style={{ fontWeight: 500 }}>{b.nama}</td>
+                        <td>{formatDate(b.event_date, 'en')}</td>
+                        <td>{formatTime(b.slot_time)}</td>
+                        <td>{b.no_telefon}</td>
+                        <td style={{ color: 'var(--success)' }}>{b.checked_in_at ? new Date(b.checked_in_at).toLocaleTimeString() : '—'}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       ) : loading ? (
         <div className="glass-card"><div className="skeleton" style={{ height: 400 }} /></div>
       ) : view === 'table' ? (
