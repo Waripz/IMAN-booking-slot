@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
                 <tbody>
                   {bookings
                     .filter(b => b.checked_in)
-                    .sort((a, b) => new Date(b.checked_in_at || '').getTime() - new Date(a.checked_in_at || '').getTime())
+                    .sort((a, b) => a.event_date.localeCompare(b.event_date) || a.slot_time.localeCompare(b.slot_time))
                     .map((b, i) => (
                       <tr key={b.id}>
                         <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
