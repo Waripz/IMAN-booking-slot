@@ -64,6 +64,25 @@ export default function AdminDashboardPage() {
     window.location.href = '/admin'
   }
 
+  const cancelBooking = async (ref: string, name: string) => {
+    if (!confirm(`Cancel booking for ${name} (${ref})?`)) return
+    try {
+      const res = await fetch('/api/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ booking_ref: ref }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        fetchBookings()
+      } else {
+        alert('Failed to cancel booking')
+      }
+    } catch {
+      alert('Network error')
+    }
+  }
+
   const filtered = bookings.filter(b => {
     if (!searchQuery) return true
     const q = searchQuery.toLowerCase()
@@ -308,7 +327,7 @@ export default function AdminDashboardPage() {
                 <thead>
                   <tr>
                     <th>#</th><th>Ref</th><th>Date</th><th>Time</th><th>Name</th>
-                    <th>Email</th><th>Phone</th><th>Age</th><th>Area</th><th>State</th><th>Status</th>
+                    <th>Email</th><th>Phone</th><th>Age</th><th>Area</th><th>State</th><th>Status</th><th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -330,6 +349,11 @@ export default function AdminDashboardPage() {
                         ) : (
                           <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>—</span>
                         )}
+                      </td>
+                      <td>
+                        <button className="btn btn-ghost" onClick={() => cancelBooking(b.booking_ref, b.nama)} style={{ color: 'var(--danger)', fontSize: '0.75rem', padding: '4px 8px' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
                       </td>
                     </tr>
                   ))}
