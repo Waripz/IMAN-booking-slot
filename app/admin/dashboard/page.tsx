@@ -29,6 +29,8 @@ export default function AdminDashboardPage() {
   const [filterDate, setFilterDate] = useState('')
   const [filterSlot, setFilterSlot] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [checkedDate, setCheckedDate] = useState('')
+  const [checkedSlot, setCheckedSlot] = useState('')
 
   const eventDates = getEventDates()
 
@@ -191,42 +193,103 @@ export default function AdminDashboardPage() {
       {view === 'scanner' ? (
         <ScannerView />
       ) : view === 'checked' ? (
-        <div className="glass-card fade-in">
-          <h3 style={{ fontFamily: 'var(--font-heading)', marginBottom: 16 }}>Checked In ({bookings.filter(b => b.checked_in).length})</h3>
-          {bookings.filter(b => b.checked_in).length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
-              </div>
-              <p>No one checked in yet</p>
-            </div>
-          ) : (
-            <div className="table-container" style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>#</th><th>Ref</th><th>Name</th><th>Date</th><th>Time</th><th>Phone</th><th>Checked In At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings
-                    .filter(b => b.checked_in)
-                    .sort((a, b) => a.event_date.localeCompare(b.event_date) || a.slot_time.localeCompare(b.slot_time))
-                    .map((b, i) => (
-                      <tr key={b.id}>
-                        <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
-                        <td><span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--accent)', fontSize: '0.8rem' }}>{b.booking_ref}</span></td>
-                        <td style={{ fontWeight: 500 }}>{b.nama}</td>
-                        <td>{formatDate(b.event_date, 'en')}</td>
-                        <td>{formatTime(b.slot_time)}</td>
-                        <td>{b.no_telefon}</td>
-                        <td style={{ color: 'var(--success)' }}>{b.checked_in_at ? new Date(b.checked_in_at).toLocaleTimeString() : '—'}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+        <div className="fade-in">
+          {/* Breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontSize: '0.85rem' }}>
+            <button className="btn btn-ghost" onClick={() => { setCheckedDate(''); setCheckedSlot('') }} style={{ fontWeight: checkedDate ? 400 : 600, color: checkedDate ? 'var(--text-muted)' : 'var(--accent)' }}>Checked In ({bookings.filter(b => b.checked_in).length})</button>
+            {checkedDate && (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <button className="btn btn-ghost" onClick={() => setCheckedSlot('')} style={{ fontWeight: checkedSlot ? 400 : 600, color: checkedSlot ? 'var(--text-muted)' : 'var(--accent)' }}>{formatDate(checkedDate, 'en')}</button>
+              </>
+            )}
+            {checkedSlot && (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{formatTime(checkedSlot)}</span>
+              </>
+            )}
+          </div>
+
+          {/* Level 1: Date list */}
+          {!checkedDate && (
+            <div className="date-grid">
+              {eventDates.map(date => {
+                const count = bookings.filter(b => b.checked_in && b.event_date === date).length
+                const total = bookings.filter(b => b.event_date === date).length
+                const d = new Date(date + 'T00:00:00')
+                return (
+                  <div key={date} className={`date-card ${count > 0 ? '' : ''}`} onClick={() => setCheckedDate(date)} style={{ cursor: 'pointer' }}>
+                    <div className="date-card-day">{d.getDate()}</div>
+                    <div className="date-card-label">{formatDate(date, 'en')}</div>
+                    <div style={{ marginTop: 8, fontSize: '0.8rem', color: count > 0 ? 'var(--success)' : 'var(--text-muted)' }}>
+                      <span style={{ fontWeight: 700 }}>{count}</span>/{total} checked in
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
+
+          {/* Level 2: Time slots for selected date */}
+          {checkedDate && !checkedSlot && (
+            <div className="slot-grid">
+              {ALL_SLOT_TIMES.map(slot => {
+                const checked = bookings.filter(b => b.checked_in && b.event_date === checkedDate && b.slot_time === slot).length
+                const total = bookings.filter(b => b.event_date === checkedDate && b.slot_time === slot).length
+                return (
+                  <div key={slot} className="slot-card" onClick={() => setCheckedSlot(slot)} style={{ cursor: 'pointer' }}>
+                    <div className="slot-time">{formatTime(slot)}</div>
+                    <div style={{ marginTop: 8, fontSize: '0.8rem', color: checked > 0 ? 'var(--success)' : 'var(--text-muted)' }}>
+                      <span style={{ fontWeight: 700 }}>{checked}</span>/{total} checked in
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Level 3: People list for selected date + slot */}
+          {checkedDate && checkedSlot && (() => {
+            const people = bookings.filter(b => b.event_date === checkedDate && b.slot_time === checkedSlot)
+            return (
+              <div className="glass-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <h3 style={{ fontFamily: 'var(--font-heading)' }}>{formatDate(checkedDate, 'en')} &middot; {formatTime(checkedSlot)}</h3>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{people.filter(p => p.checked_in).length}/{people.length} checked in</span>
+                </div>
+                {people.length === 0 ? (
+                  <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 32 }}>No bookings for this slot</p>
+                ) : (
+                  <div className="table-container" style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                    <table className="data-table">
+                      <thead>
+                        <tr><th>#</th><th>Ref</th><th>Name</th><th>Phone</th><th>Area</th><th>Status</th></tr>
+                      </thead>
+                      <tbody>
+                        {people.map((b, i) => (
+                          <tr key={b.id}>
+                            <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
+                            <td><span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--accent)', fontSize: '0.8rem' }}>{b.booking_ref}</span></td>
+                            <td style={{ fontWeight: 500 }}>{b.nama}</td>
+                            <td>{b.no_telefon}</td>
+                            <td>{b.daerah}, {b.negeri}</td>
+                            <td>
+                              {b.checked_in ? (
+                                <span className="badge-available" style={{ padding: '2px 10px', borderRadius: 20, fontSize: '0.75rem', fontWeight: 600 }}>Checked In</span>
+                              ) : (
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Not yet</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
         </div>
       ) : loading ? (
         <div className="glass-card"><div className="skeleton" style={{ height: 400 }} /></div>
