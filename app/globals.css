@@ -725,7 +725,7 @@ body {
 }
 
 select.form-input option {
-  background: #1a1a2e;
+  background: var(--bg-primary);
   color: var(--text-primary);
   padding: 8px 12px;
 }
