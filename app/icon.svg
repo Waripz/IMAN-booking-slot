@@ -1,6 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="50" fill="#ec008c"/>
-  <path d="M50 85 C35 75, 40 45, 50 25 C60 45, 65 75, 50 85 Z" fill="white"/>
-  <path d="M45 80 C20 70, 15 45, 25 35 C35 45, 45 60, 45 80 Z" fill="white"/>
-  <path d="M55 80 C80 70, 85 45, 75 35 C65 45, 55 60, 55 80 Z" fill="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <circle cx="60" cy="60" r="60" fill="#F90084" />
+  
+  <!-- Left Leaf -->
+  <path d="M 35 95 C 20 70, 15 40, 30 25 C 40 40, 45 70, 35 95 Z" fill="#ffffff" />
+  
+  <!-- Middle Leaf -->
+  <path d="M 45 75 C 45 50, 50 25, 75 15 C 65 35, 60 60, 45 75 Z" fill="#ffffff" />
+  
+  <!-- Right Leaf -->
+  <path d="M 50 90 C 70 70, 95 60, 105 60 C 85 80, 75 95, 60 100 C 55 95, 52 93, 50 90 Z" fill="#ffffff" />
 </svg>
