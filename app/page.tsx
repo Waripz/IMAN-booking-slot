@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { ALL_SLOT_TIMES, EVENT_CONFIG, formatTime, formatDate, t, type Lang } from '@/lib/constants'
+import { MALAYSIA_STATES, NEGERI_LIST } from '@/lib/malaysia'
 
 type SlotAvailability = Record<string, number>
 
@@ -304,28 +305,34 @@ export default function Home() {
 
             <div className="form-row">
               <div className="form-group">
+                <label className="form-label">{tx.state}</label>
+                <select
+                  id="input-negeri"
+                  className="form-input"
+                  value={formData.negeri}
+                  onChange={e => {
+                    handleInputChange('negeri', e.target.value)
+                    handleInputChange('daerah', '') // reset daerah on negeri change
+                  }}
+                  required
+                >
+                  <option value="" disabled>{lang === 'ms' ? 'Pilih Negeri' : 'Select State'}</option>
+                  {NEGERI_LIST.map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
                 <label className="form-label">{tx.area}</label>
-                <input
+                <select
                   id="input-daerah"
                   className="form-input"
-                  type="text"
-                  placeholder={tx.areaPlaceholder}
                   value={formData.daerah}
                   onChange={e => handleInputChange('daerah', e.target.value)}
                   required
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">{tx.state}</label>
-                <input
-                  id="input-negeri"
-                  className="form-input"
-                  type="text"
-                  placeholder={tx.statePlaceholder}
-                  value={formData.negeri}
-                  onChange={e => handleInputChange('negeri', e.target.value)}
-                  required
-                />
+                  disabled={!formData.negeri}
+                >
+                  <option value="" disabled>{lang === 'ms' ? 'Pilih Daerah' : 'Select District'}</option>
+                  {formData.negeri && MALAYSIA_STATES[formData.negeri]?.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
               </div>
             </div>
 
