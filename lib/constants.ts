@@ -4,8 +4,7 @@
 
 export const EVENT_CONFIG = {
   name: 'IMAN Booking Slot',
-  startDate: process.env.NEXT_PUBLIC_EVENT_START_DATE || '2026-06-01',
-  endDate: process.env.NEXT_PUBLIC_EVENT_END_DATE || '2026-06-14',
+  eventDate: '2026-06-06',
   slotDurationMinutes: 20,
   maxPerSlot: 30,
   startHour: 13, // 1 PM
@@ -46,18 +45,9 @@ export function formatSlotRange(time24: string): string {
   return `${formatTime(time24)} - ${formatTime(`${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`)}`
 }
 
-// Generate event dates array
+// Generate event dates array (single date event)
 export function getEventDates(): string[] {
-  const dates: string[] = []
-  const start = new Date(EVENT_CONFIG.startDate + 'T00:00:00')
-  const end = new Date(EVENT_CONFIG.endDate + 'T00:00:00')
-  
-  const current = new Date(start)
-  while (current <= end) {
-    dates.push(current.toISOString().split('T')[0])
-    current.setDate(current.getDate() + 1)
-  }
-  return dates
+  return [EVENT_CONFIG.eventDate]
 }
 
 // Format date for display
@@ -83,11 +73,10 @@ export const t = {
   ms: {
     siteTitle: 'IMAN Booking Slot',
     heroTitle: 'Tempah Slot Anda',
-    heroSubtitle: 'Pilih tarikh dan masa yang sesuai untuk anda',
-    step1: 'Pilih Tarikh',
-    step2: 'Pilih Slot Masa',
-    step3: 'Maklumat Peribadi',
-    step4: 'Sahkan Tempahan',
+    heroSubtitle: '6 Jun 2026 — Pilih masa yang sesuai untuk anda',
+    step1: 'Pilih Slot Masa',
+    step2: 'Maklumat Peribadi',
+    step3: 'Sahkan Tempahan',
     name: 'Nama',
     namePlaceholder: 'Nama penuh anda',
     email: 'Emel',
@@ -144,11 +133,10 @@ export const t = {
   en: {
     siteTitle: 'IMAN Booking Slot',
     heroTitle: 'Book Your Slot',
-    heroSubtitle: 'Choose a date and time that suits you',
-    step1: 'Select Date',
-    step2: 'Select Time Slot',
-    step3: 'Personal Details',
-    step4: 'Confirm Booking',
+    heroSubtitle: '6 June 2026 — Choose a time that suits you',
+    step1: 'Select Time Slot',
+    step2: 'Personal Details',
+    step3: 'Confirm Booking',
     name: 'Name',
     namePlaceholder: 'Your full name',
     email: 'Email',

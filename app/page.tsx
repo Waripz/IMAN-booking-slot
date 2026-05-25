@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ALL_SLOT_TIMES, formatTime, formatDate, getEventDates, t, type Lang } from '@/lib/constants'
+import { ALL_SLOT_TIMES, EVENT_CONFIG, formatTime, formatDate, t, type Lang } from '@/lib/constants'
 
 type SlotAvailability = Record<string, number>
 
@@ -23,10 +23,11 @@ const INITIAL_FORM: BookingData = {
   negeri: '',
 }
 
+const EVENT_DATE = EVENT_CONFIG.eventDate // '2026-06-06'
+
 export default function Home() {
   const [lang, setLang] = useState<Lang>('ms')
   const [step, setStep] = useState(1)
-  const [selectedDate, setSelectedDate] = useState('')
   const [selectedSlot, setSelectedSlot] = useState('')
   const [formData, setFormData] = useState<BookingData>(INITIAL_FORM)
   const [slotAvailability, setSlotAvailability] = useState<SlotAvailability>({})
@@ -37,13 +38,12 @@ export default function Home() {
   const [checkLoading, setCheckLoading] = useState(false)
 
   const tx = t[lang]
-  const eventDates = getEventDates()
 
-  // Fetch slot availability when date is selected
-  const fetchAvailability = useCallback(async (date: string) => {
+  // Fetch slot availability on mount (single date)
+  const fetchAvailability = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/slots?date=${date}`)
+      const res = await fetch(`/api/slots?date=${EVENT_DATE}`)
       const data = await res.json()
       if (data.availability) {
         const map: SlotAvailability = {}
@@ -60,22 +60,14 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (selectedDate) {
-      fetchAvailability(selectedDate)
-    }
-  }, [selectedDate, fetchAvailability])
-
-  const handleDateSelect = (date: string) => {
-    setSelectedDate(date)
-    setSelectedSlot('')
-    setStep(2)
-  }
+    fetchAvailability()
+  }, [fetchAvailability])
 
   const handleSlotSelect = (slot: string) => {
     const count = slotAvailability[slot] || 0
     if (count >= 30) return
     setSelectedSlot(slot)
-    setStep(3)
+    setStep(2)
   }
 
   const handleInputChange = (field: keyof BookingData, value: string) => {
@@ -97,7 +89,7 @@ export default function Home() {
   }
 
   const handleSubmit = async () => {
-    if (!isFormValid() || !selectedDate || !selectedSlot) return
+    if (!isFormValid() || !selectedSlot) return
 
     setSubmitting(true)
     setError('')
@@ -108,7 +100,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           slot_time: selectedSlot,
-          event_date: selectedDate,
+          event_date: EVENT_DATE,
           ...formData,
           umur: Number(formData.umur),
         }),
@@ -122,8 +114,8 @@ export default function Home() {
       } else {
         if (data.error === 'SLOT_FULL') {
           setError(tx.errorSlotFull)
-          setStep(2)
-          fetchAvailability(selectedDate)
+          setStep(1)
+          fetchAvailability()
         } else if (data.error === 'ALREADY_BOOKED') {
           setError(tx.errorAlreadyBooked)
         } else {
@@ -183,7 +175,7 @@ export default function Home() {
 
       {/* Steps Indicator */}
       <div className="steps">
-        {[tx.step1, tx.step2, tx.step3].map((label, i) => (
+        {[tx.step1, tx.step2].map((label, i) => (
           <div
             key={i}
             className={`step ${step === i + 1 ? 'active' : ''} ${step > i + 1 ? 'completed' : ''}`}
@@ -201,40 +193,12 @@ export default function Home() {
         <div className="toast toast-error">{error}</div>
       )}
 
-      {/* Step 1: Date Selection */}
+      {/* Step 1: Slot Selection */}
       {step === 1 && (
         <div className="glass-card fade-in">
           <h2 className="section-title">{tx.step1}</h2>
           <p className="section-subtitle">
-            {lang === 'ms' ? 'Pilih tarikh untuk tempahan anda' : 'Choose a date for your booking'}
-          </p>
-          <div className="date-grid">
-            {eventDates.map(date => {
-              const d = new Date(date + 'T00:00:00')
-              return (
-                <div
-                  key={date}
-                  className={`date-card ${selectedDate === date ? 'selected' : ''}`}
-                  onClick={() => handleDateSelect(date)}
-                >
-                  <div className="date-card-day">{d.getDate()}</div>
-                  <div className="date-card-label">{formatDate(date, lang)}</div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Step 2: Slot Selection */}
-      {step === 2 && (
-        <div className="glass-card fade-in">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <h2 className="section-title">{tx.step2}</h2>
-            <button className="btn btn-ghost" onClick={() => setStep(1)}>← {tx.step1}</button>
-          </div>
-          <p className="section-subtitle">
-            {formatDate(selectedDate, lang)} — {lang === 'ms' ? '30 tempahan setiap slot' : '30 bookings per slot'}
+            {formatDate(EVENT_DATE, lang)} — {lang === 'ms' ? '30 tempahan setiap slot' : '30 bookings per slot'}
           </p>
 
           {loading ? (
@@ -271,15 +235,15 @@ export default function Home() {
         </div>
       )}
 
-      {/* Step 3: Personal Details Form */}
-      {step === 3 && (
+      {/* Step 2: Personal Details Form */}
+      {step === 2 && (
         <div className="glass-card fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <h2 className="section-title">{tx.step3}</h2>
-            <button className="btn btn-ghost" onClick={() => setStep(2)}>← {tx.step2}</button>
+            <h2 className="section-title">{tx.step2}</h2>
+            <button className="btn btn-ghost" onClick={() => setStep(1)}>← {tx.step1}</button>
           </div>
           <p className="section-subtitle">
-            {formatDate(selectedDate, lang)} · {formatTime(selectedSlot)}
+            {formatDate(EVENT_DATE, lang)} · {formatTime(selectedSlot)}
           </p>
 
           <div className="form-section">
@@ -368,11 +332,11 @@ export default function Home() {
             {/* Review Summary */}
             <div className="glass-card" style={{ marginTop: 24, marginBottom: 24, padding: 20 }}>
               <h3 className="section-title" style={{ fontSize: '1rem', marginBottom: 12 }}>
-                {tx.step4}
+                {tx.step3}
               </h3>
               <div className="detail-row">
                 <span className="detail-label">{tx.date}</span>
-                <span className="detail-value">{formatDate(selectedDate, lang)}</span>
+                <span className="detail-value">{formatDate(EVENT_DATE, lang)}</span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">{tx.time}</span>
