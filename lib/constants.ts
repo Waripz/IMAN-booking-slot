@@ -8,7 +8,7 @@ export const EVENT_CONFIG = {
   slotDurationMinutes: 20,
   maxPerSlot: 30,
   startHour: 13, // 1 PM
-  endHour: 21,   // 9 PM (last slot starts at 8:40 PM)
+  endHour: 20,   // 8 PM (last slot starts at 7:40 PM)
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
 }
 
