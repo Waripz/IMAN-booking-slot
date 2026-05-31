@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const { slot_time, event_date, nama, email, no_telefon, umur, daerah, negeri } = body
+    const { slot_time, event_date, nama, email, no_telefon, umur, daerah, negeri, bilangan } = body
 
     // Basic validation
     if (!slot_time || !event_date || !nama || !email || !no_telefon || !umur || !daerah || !negeri) {
@@ -20,6 +20,12 @@ export async function POST(request: NextRequest) {
     // Email format validation
     if (!email.includes('@') || !email.includes('.')) {
       return NextResponse.json({ success: false, error: 'INVALID_EMAIL' }, { status: 400 })
+    }
+
+    // Bilangan validation (1-3)
+    const bil = Number(bilangan) || 1
+    if (bil < 1 || bil > 3) {
+      return NextResponse.json({ success: false, error: 'INVALID_BILANGAN' }, { status: 400 })
     }
 
     // Call the atomic booking RPC
@@ -32,6 +38,7 @@ export async function POST(request: NextRequest) {
       p_umur: Number(umur),
       p_daerah: daerah.trim(),
       p_negeri: negeri.trim(),
+      p_bilangan: bil,
     })
 
     if (error) {
@@ -55,6 +62,7 @@ export async function POST(request: NextRequest) {
           nama: nama.trim(),
           date: event_date,
           time: slot_time,
+          bilangan: bil,
         })
       } catch (emailErr) {
         // Don't fail the booking if email fails
@@ -78,6 +86,7 @@ async function sendConfirmationEmail(params: {
   nama: string
   date: string
   time: string
+  bilangan: number
 }) {
   const { Resend } = await import('resend')
   const resend = new Resend(process.env.RESEND_API_KEY)
@@ -107,7 +116,8 @@ async function sendConfirmationEmail(params: {
         <table style="width: 100%; border-collapse: collapse;">
           <tr><td style="padding: 10px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.06);">Nama / Name</td><td style="padding: 10px 0; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.06);">${params.nama}</td></tr>
           <tr><td style="padding: 10px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.06);">Tarikh / Date</td><td style="padding: 10px 0; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.06);">${params.date}</td></tr>
-          <tr><td style="padding: 10px 0; color: #94a3b8;">Masa / Time</td><td style="padding: 10px 0; text-align: right;">${timeDisplay}</td></tr>
+          <tr><td style="padding: 10px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.06);">Masa / Time</td><td style="padding: 10px 0; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.06);">${timeDisplay}</td></tr>
+          <tr><td style="padding: 10px 0; color: #94a3b8;">Bilangan / People</td><td style="padding: 10px 0; text-align: right;">${params.bilangan}</td></tr>
         </table>
         
         <div style="text-align: center; margin: 30px 0;">

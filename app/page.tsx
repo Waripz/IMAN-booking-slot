@@ -13,6 +13,7 @@ interface BookingData {
   umur: string
   daerah: string
   negeri: string
+  bilangan: string
 }
 
 const INITIAL_FORM: BookingData = {
@@ -22,6 +23,7 @@ const INITIAL_FORM: BookingData = {
   umur: '',
   daerah: '',
   negeri: '',
+  bilangan: '1',
 }
 
 const EVENT_DATE = EVENT_CONFIG.eventDate // '2026-06-06'
@@ -66,7 +68,7 @@ export default function Home() {
 
   const handleSlotSelect = (slot: string) => {
     const count = slotAvailability[slot] || 0
-    if (count >= 30) return
+    if (count >= EVENT_CONFIG.maxPerSlot) return
     setSelectedSlot(slot)
     setStep(2)
   }
@@ -104,6 +106,7 @@ export default function Home() {
           event_date: EVENT_DATE,
           ...formData,
           umur: Number(formData.umur),
+          bilangan: Number(formData.bilangan) || 1,
         }),
       })
 
@@ -151,8 +154,8 @@ export default function Home() {
 
   const getSlotStatus = (slot: string) => {
     const count = slotAvailability[slot] || 0
-    if (count >= 30) return 'full'
-    if (count >= 20) return 'filling'
+    if (count >= EVENT_CONFIG.maxPerSlot) return 'full'
+    if (count >= EVENT_CONFIG.maxPerSlot * 0.67) return 'filling'
     return 'available'
   }
 
@@ -213,7 +216,7 @@ export default function Home() {
               {ALL_SLOT_TIMES.map(slot => {
                 const status = getSlotStatus(slot)
                 const count = slotAvailability[slot] || 0
-                const remaining = 30 - count
+                const remaining = EVENT_CONFIG.maxPerSlot - count
 
                 return (
                   <div
@@ -223,7 +226,7 @@ export default function Home() {
                   >
                     <div className="slot-time">{formatTime(slot)}</div>
                     <div className="slot-count">
-                      {count}/30 — {remaining} {tx.slotsLeft}
+                      {count}/{EVENT_CONFIG.maxPerSlot} — {remaining} {tx.slotsLeft}
                     </div>
                     <span className={`slot-badge badge-${status}`}>
                       {status === 'available' ? tx.available : status === 'filling' ? tx.filling : tx.full}
@@ -303,6 +306,33 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Bilangan Orang */}
+            <div className="form-group">
+              <label className="form-label">{tx.bilangan}</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[1, 2, 3].map(n => {
+                  const count = slotAvailability[selectedSlot] || 0
+                  const remaining = EVENT_CONFIG.maxPerSlot - count
+                  const disabled = n > remaining
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`btn ${formData.bilangan === String(n) ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ flex: 1, padding: '12px 0', opacity: disabled ? 0.4 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
+                      onClick={() => !disabled && handleInputChange('bilangan', String(n))}
+                      disabled={disabled}
+                    >
+                      {n} {lang === 'ms' ? 'orang' : n > 1 ? 'people' : 'person'}
+                    </button>
+                  )
+                })}
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 6 }}>
+                {lang === 'ms' ? `Maksimum ${EVENT_CONFIG.maxBilangan} orang setiap tempahan` : `Maximum ${EVENT_CONFIG.maxBilangan} people per booking`}
+              </p>
+            </div>
+
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">{tx.state}</label>
@@ -355,6 +385,10 @@ export default function Home() {
                   <span className="detail-value">{formData.nama}</span>
                 </div>
               )}
+              <div className="detail-row">
+                <span className="detail-label">{tx.bilangan}</span>
+                <span className="detail-value">{formData.bilangan} {lang === 'ms' ? 'orang' : Number(formData.bilangan) > 1 ? 'people' : 'person'}</span>
+              </div>
             </div>
 
             <button

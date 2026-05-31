@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import { formatTime, formatDate, getEventDates, ALL_SLOT_TIMES } from '@/lib/constants'
+import { formatTime, formatDate, getEventDates, ALL_SLOT_TIMES, EVENT_CONFIG } from '@/lib/constants'
 import ScannerView from './ScannerView'
 
 interface Booking {
@@ -16,6 +16,7 @@ interface Booking {
   umur: number
   daerah: string
   negeri: string
+  bilangan: number
   checked_in: boolean
   checked_in_at: string | null
   created_at: string
@@ -141,11 +142,11 @@ export default function AdminDashboardPage() {
     )
   })
 
-  const totalBookings = bookings.length
+  const totalPeople = bookings.reduce((sum, b) => sum + (b.bilangan || 1), 0)
   const today = new Date().toISOString().split('T')[0]
-  const todayBookings = bookings.filter(b => b.event_date === today).length
-  const totalCapacity = eventDates.length * ALL_SLOT_TIMES.length * 30
-  const capacityPercent = totalCapacity > 0 ? ((totalBookings / totalCapacity) * 100).toFixed(1) : '0'
+  const todayPeople = bookings.filter(b => b.event_date === today).reduce((sum, b) => sum + (b.bilangan || 1), 0)
+  const totalCapacity = eventDates.length * ALL_SLOT_TIMES.length * EVENT_CONFIG.maxPerSlot
+  const capacityPercent = totalCapacity > 0 ? ((totalPeople / totalCapacity) * 100).toFixed(1) : '0'
   const checkedInCount = bookings.filter(b => b.checked_in).length
 
   const tallyGroups = filtered.reduce((acc, b) => {
@@ -156,9 +157,9 @@ export default function AdminDashboardPage() {
   }, {} as Record<string, Booking[]>)
 
   const exportCSV = () => {
-    const headers = ['Ref', 'Date', 'Time', 'Name', 'Email', 'Phone', 'Age', 'Area', 'State', 'Checked In', 'Created']
+    const headers = ['Ref', 'Date', 'Time', 'Name', 'Qty', 'Email', 'Phone', 'Age', 'Area', 'State', 'Checked In', 'Created']
     const rows = filtered.map(b => [
-      b.booking_ref, b.event_date, b.slot_time, b.nama, b.email,
+      b.booking_ref, b.event_date, b.slot_time, b.nama, (b.bilangan || 1).toString(), b.email,
       b.no_telefon, b.umur.toString(), b.daerah, b.negeri,
       b.checked_in ? 'Yes' : 'No',
       new Date(b.created_at).toLocaleString(),
@@ -204,12 +205,12 @@ export default function AdminDashboardPage() {
       {/* Stat Cards */}
       <div className="stat-cards fade-in">
         <div className="stat-card">
-          <div className="stat-value">{totalBookings}</div>
-          <div className="stat-label">Total Bookings</div>
+          <div className="stat-value">{totalPeople}</div>
+          <div className="stat-label">Total People</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{todayBookings}</div>
-          <div className="stat-label">{"Today's Bookings"}</div>
+          <div className="stat-value">{todayPeople}</div>
+          <div className="stat-label">{"Today's People"}</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{capacityPercent}%</div>
@@ -380,7 +381,7 @@ export default function AdminDashboardPage() {
                         title="Select all"
                       />
                     </th>
-                    <th>#</th><th>Ref</th><th>Date</th><th>Time</th><th>Name</th>
+                    <th>#</th><th>Ref</th><th>Date</th><th>Time</th><th>Name</th><th>Qty</th>
                     <th>Email</th><th>Phone</th><th>Age</th><th>Area</th><th>State</th><th>Status</th><th></th>
                   </tr>
                 </thead>
@@ -400,6 +401,7 @@ export default function AdminDashboardPage() {
                       <td>{formatDate(b.event_date, 'en')}</td>
                       <td>{formatTime(b.slot_time)}</td>
                       <td style={{ fontWeight: 500 }}>{b.nama}</td>
+                      <td><span style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: (b.bilangan || 1) > 1 ? 'var(--accent)' : 'var(--text-primary)' }}>{b.bilangan || 1}</span></td>
                       <td>{b.email}</td>
                       <td>{b.no_telefon}</td>
                       <td>{b.umur}</td>
@@ -449,7 +451,7 @@ export default function AdminDashboardPage() {
                         <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{formatDate(date, 'en')}</div>
                       </div>
                       <div className="tally-count">
-                        <span style={{ fontWeight: 700, color: items.length >= 30 ? 'var(--danger)' : items.length >= 20 ? 'var(--warning)' : 'var(--success)' }}>{items.length}</span>/30
+                        <span style={{ fontWeight: 700, color: items.reduce((s, b) => s + (b.bilangan || 1), 0) >= EVENT_CONFIG.maxPerSlot ? 'var(--danger)' : items.reduce((s, b) => s + (b.bilangan || 1), 0) >= EVENT_CONFIG.maxPerSlot * 0.67 ? 'var(--warning)' : 'var(--success)' }}>{items.reduce((s, b) => s + (b.bilangan || 1), 0)}</span>/{EVENT_CONFIG.maxPerSlot}
                       </div>
                     </div>
                     <ul className="tally-list">
@@ -458,6 +460,9 @@ export default function AdminDashboardPage() {
                           <span className="tally-name">
                             <span style={{ color: 'var(--text-muted)', marginRight: 8, fontSize: '0.75rem' }}>{i + 1}.</span>
                             {b.nama}
+                            {(b.bilangan || 1) > 1 && (
+                              <span style={{ marginLeft: 6, fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 600 }}>×{b.bilangan}</span>
+                            )}
                             {b.checked_in && (
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 6, verticalAlign: 'middle' }}><polyline points="20 6 9 17 4 12"/></svg>
                             )}

@@ -7,6 +7,7 @@ export const EVENT_CONFIG = {
   eventDate: '2026-06-06',
   slotDurationMinutes: 20,
   maxPerSlot: 30,
+  maxBilangan: 3,
   startHour: 13, // 1 PM
   endHour: 20,   // 8 PM (last slot starts at 7:40 PM)
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
@@ -129,6 +130,8 @@ export const t = {
     searchPlaceholder: 'Cari nama, emel, rujukan...',
     of: 'daripada',
     perSlot: 'setiap slot',
+    bilangan: 'Bilangan Orang',
+    bilanganPlaceholder: 'Pilih bilangan orang',
   },
   en: {
     siteTitle: 'IMAN Booking Slot',
@@ -189,5 +192,7 @@ export const t = {
     searchPlaceholder: 'Search name, email, reference...',
     of: 'of',
     perSlot: 'per slot',
+    bilangan: 'Number of People',
+    bilanganPlaceholder: 'Select number of people',
   },
 } as const

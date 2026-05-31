@@ -14,6 +14,7 @@ interface Booking {
   umur: number
   daerah: string
   negeri: string
+  bilangan: number
   created_at: string
 }
 
@@ -161,6 +162,10 @@ export default function ConfirmationPage() {
             <div className="detail-row">
               <span className="detail-label">{lang === 'ms' ? 'Nama' : 'Name'}</span>
               <span className="detail-value">{booking.nama}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">{lang === 'ms' ? 'Bilangan Orang' : 'Number of People'}</span>
+              <span className="detail-value">{booking.bilangan} {lang === 'ms' ? 'orang' : booking.bilangan > 1 ? 'people' : 'person'}</span>
             </div>
             <div className="detail-row">
               <span className="detail-label">{lang === 'ms' ? 'Tarikh' : 'Date'}</span>
