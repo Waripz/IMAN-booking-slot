@@ -1018,5 +1018,62 @@ select.form-input option {
   border-radius: var(--radius-md) !important;
 }
 
+/* ---- Bulk Select ---- */
+.bulk-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.data-table tr.row-selected td {
+  background: rgba(249, 0, 132, 0.06);
+}
+
+.bulk-action-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--glass-border);
+  z-index: 100;
+  min-width: 360px;
+  max-width: 90vw;
+}
+
+.bulk-action-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.bulk-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 500px) {
+  .bulk-action-bar {
+    min-width: unset;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
 
 

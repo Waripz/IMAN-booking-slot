@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { formatTime, formatDate, getEventDates, ALL_SLOT_TIMES } from '@/lib/constants'
 import ScannerView from './ScannerView'
@@ -31,6 +31,8 @@ export default function AdminDashboardPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [checkedDate, setCheckedDate] = useState('')
   const [checkedSlot, setCheckedSlot] = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
 
   const eventDates = getEventDates()
 
@@ -80,6 +82,49 @@ export default function AdminDashboardPage() {
       }
     } catch {
       alert('Network error')
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filtered.map(b => b.id)))
+    }
+  }
+
+  const bulkCancel = async () => {
+    const count = selectedIds.size
+    if (!confirm(`Cancel ${count} booking${count > 1 ? 's' : ''}? This cannot be undone.`)) return
+    setBulkDeleting(true)
+    try {
+      const refs = bookings.filter(b => selectedIds.has(b.id)).map(b => b.booking_ref)
+      let successCount = 0
+      for (const ref of refs) {
+        const res = await fetch('/api/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ booking_ref: ref }),
+        })
+        const data = await res.json()
+        if (data.success) successCount++
+      }
+      setSelectedIds(new Set())
+      fetchBookings()
+      alert(`Successfully cancelled ${successCount} of ${count} bookings.`)
+    } catch {
+      alert('Network error during bulk cancel')
+    } finally {
+      setBulkDeleting(false)
     }
   }
 
@@ -326,13 +371,30 @@ export default function AdminDashboardPage() {
               <table className="data-table">
                 <thead>
                   <tr>
+                    <th style={{ width: 40 }}>
+                      <input
+                        type="checkbox"
+                        className="bulk-checkbox"
+                        checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                        onChange={toggleSelectAll}
+                        title="Select all"
+                      />
+                    </th>
                     <th>#</th><th>Ref</th><th>Date</th><th>Time</th><th>Name</th>
                     <th>Email</th><th>Phone</th><th>Age</th><th>Area</th><th>State</th><th>Status</th><th></th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((b, i) => (
-                    <tr key={b.id}>
+                    <tr key={b.id} className={selectedIds.has(b.id) ? 'row-selected' : ''}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="bulk-checkbox"
+                          checked={selectedIds.has(b.id)}
+                          onChange={() => toggleSelect(b.id)}
+                        />
+                      </td>
                       <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
                       <td><span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--accent)', fontSize: '0.8rem' }}>{b.booking_ref}</span></td>
                       <td>{formatDate(b.event_date, 'en')}</td>
@@ -408,6 +470,35 @@ export default function AdminDashboardPage() {
                 )
               })
           )}
+        </div>
+      )}
+
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bulk-action-bar fade-in">
+          <div className="bulk-action-info">
+            <input
+              type="checkbox"
+              className="bulk-checkbox"
+              checked={true}
+              onChange={() => setSelectedIds(new Set())}
+            />
+            <span><strong>{selectedIds.size}</strong> booking{selectedIds.size > 1 ? 's' : ''} selected</span>
+          </div>
+          <div className="bulk-action-buttons">
+            <button className="btn btn-ghost btn-sm" onClick={() => setSelectedIds(new Set())}>
+              Clear
+            </button>
+            <button className="btn btn-sm" onClick={bulkCancel} disabled={bulkDeleting}
+              style={{ background: 'var(--danger)', color: '#fff' }}
+            >
+              {bulkDeleting ? (
+                <><span className="spinner" style={{ width: 14, height: 14, borderTopColor: '#fff' }} /> Cancelling...</>
+              ) : (
+                <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Cancel Selected</>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
