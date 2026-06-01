@@ -138,10 +138,7 @@ body {
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 1.2rem;
-  background: linear-gradient(135deg, var(--accent), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent);
   letter-spacing: -0.5px;
 }
 
@@ -181,10 +178,7 @@ body {
   font-family: var(--font-heading);
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
-  background: linear-gradient(135deg, var(--accent), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent);
   margin-bottom: 12px;
   letter-spacing: -1px;
 }
@@ -485,7 +479,7 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  background: var(--accent);
   color: #ffffff;
   box-shadow: 0 4px 16px var(--accent-glow);
 }
@@ -493,7 +487,7 @@ body {
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 24px var(--accent-glow);
-  filter: brightness(1.1);
+  background: var(--accent-dark);
 }
 
 .btn-primary:active {
@@ -504,7 +498,7 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  filter: none;
+  background: var(--accent);
 }
 
 .btn-secondary {
@@ -655,10 +649,7 @@ body {
   font-family: var(--font-heading);
   font-size: 2.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--accent), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent);
 }
 
 .stat-label {
