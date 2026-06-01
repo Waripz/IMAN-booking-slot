@@ -109,7 +109,7 @@ export default function ConfirmationPage() {
   return (
     <div className="main-container">
       <nav className="nav">
-        <a href="/" className="nav-brand" style={{ textDecoration: 'none' }}>✦ IMAN Booking Slot</a>
+        <a href="/" className="nav-brand" style={{ textDecoration: 'none' }}>Tempah Waktu Lawatan Galeri Anda</a>
         <button className="lang-toggle" onClick={() => setLang(l => l === 'ms' ? 'en' : 'ms')}>
           {lang === 'ms' ? 'EN' : 'BM'}
         </button>

@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "IMAN Booking Slot",
-  description: "Tempah slot masa anda untuk acara IMAN | Book your time slot for IMAN event",
-  keywords: ["IMAN", "booking", "slot", "tempahan", "event"],
+  title: "Galeri Sedekad Teme Abdullah",
+  description: "Tempah waktu lawatan anda ke Galeri Sedekad Teme Abdullah | Book your gallery visit",
+  keywords: ["Galeri", "Sedekad", "Teme Abdullah", "tempahan", "lawatan"],
   openGraph: {
-    title: "IMAN Booking Slot",
-    description: "Tempah slot masa anda untuk acara IMAN",
+    title: "Galeri Sedekad Teme Abdullah",
+    description: "Tempah waktu lawatan anda ke Galeri Sedekad Teme Abdullah",
     type: "website",
   },
 };

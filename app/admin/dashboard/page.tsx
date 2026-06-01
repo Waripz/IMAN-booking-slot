@@ -177,7 +177,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="main-container">
       <nav className="nav">
-        <a href="/" className="nav-brand" style={{ textDecoration: 'none' }}>✦ IMAN Booking Slot</a>
+        <a href="/" className="nav-brand" style={{ textDecoration: 'none' }}>Tempah Waktu Lawatan Galeri Anda</a>
         <div className="nav-actions">
           <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Admin</span>
           <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>

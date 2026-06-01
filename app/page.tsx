@@ -163,7 +163,7 @@ export default function Home() {
     <div className="main-container">
       {/* Navigation */}
       <nav className="nav">
-        <div className="nav-brand">✦ IMAN Booking Slot</div>
+        <div className="nav-brand">Tempah Waktu Lawatan Galeri Anda</div>
         <div className="nav-actions">
           <button className="lang-toggle" onClick={() => setLang(l => l === 'ms' ? 'en' : 'ms')}>
             {tx.langSwitch}

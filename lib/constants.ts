@@ -3,7 +3,7 @@
 // ============================================
 
 export const EVENT_CONFIG = {
-  name: 'IMAN Booking Slot',
+  name: 'Galeri Sedekad Teme Abdullah',
   eventDate: '2026-06-06',
   slotDurationMinutes: 20,
   maxPerSlot: 30,
@@ -72,9 +72,9 @@ export type Lang = 'ms' | 'en'
 
 export const t = {
   ms: {
-    siteTitle: 'IMAN Booking Slot',
-    heroTitle: 'Tempah Slot Anda',
-    heroSubtitle: '6 Jun 2026 — Pilih masa yang sesuai untuk anda',
+    siteTitle: 'Galeri Sedekad Teme Abdullah',
+    heroTitle: 'Galeri Sedekad Teme Abdullah',
+    heroSubtitle: '6 Jun 2026 — Pilih waktu lawatan yang sesuai untuk anda',
     step1: 'Pilih Slot Masa',
     step2: 'Maklumat Peribadi',
     step3: 'Sahkan Tempahan',
@@ -134,9 +134,9 @@ export const t = {
     bilanganPlaceholder: 'Pilih bilangan orang',
   },
   en: {
-    siteTitle: 'IMAN Booking Slot',
-    heroTitle: 'Book Your Slot',
-    heroSubtitle: '6 June 2026 — Choose a time that suits you',
+    siteTitle: 'Galeri Sedekad Teme Abdullah',
+    heroTitle: 'Galeri Sedekad Teme Abdullah',
+    heroSubtitle: '6 June 2026 — Choose a time that suits your visit',
     step1: 'Select Time Slot',
     step2: 'Personal Details',
     step3: 'Confirm Booking',

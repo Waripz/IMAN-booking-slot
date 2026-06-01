@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
   return (
     <div className="main-container">
       <nav className="nav">
-        <a href="/" className="nav-brand" style={{ textDecoration: 'none' }}>✦ IMAN Booking Slot</a>
+        <a href="/" className="nav-brand" style={{ textDecoration: 'none' }}>Tempah Waktu Lawatan Galeri Anda</a>
       </nav>
 
       <div className="admin-login-container fade-in">
