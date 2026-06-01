@@ -105,7 +105,7 @@ async function sendConfirmationEmail(params: {
     subject: `Pengesahan Tempahan - ${params.bookingRef}`,
     html: `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #0a0a1a; color: #f1f5f9; padding: 40px 30px; border-radius: 16px;">
-        <h1 style="text-align: center; color: #942835; font-size: 24px; margin-bottom: 8px;">Galeri Sedekad Teme Abdullah</h1>
+        <h1 style="text-align: center; color: #942835; font-size: 24px; margin-bottom: 8px;">Galeri Sedekad <span style="color: #cc974e">Teme Abdullah</span></h1>
         <p style="text-align: center; color: #94a3b8; margin-bottom: 30px;">Pengesahan Tempahan / Booking Confirmation</p>
         
         <div style="background: rgba(245,158,11,0.1); border: 2px dashed rgba(245,158,11,0.4); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">

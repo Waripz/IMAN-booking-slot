@@ -173,7 +173,9 @@ export default function Home() {
 
       {/* Hero */}
       <div className="hero">
-        <h1 className="hero-title">{tx.heroTitle}</h1>
+        <h1 className="hero-title">
+          Galeri Sedekad <span style={{ color: 'var(--gold)' }}>Teme Abdullah</span>
+        </h1>
         <p className="hero-subtitle">{tx.heroSubtitle}</p>
       </div>
 
