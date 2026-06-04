@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { formatTime, formatDate, getEventDates, ALL_SLOT_TIMES, EVENT_CONFIG } from '@/lib/constants'
 import ScannerView from './ScannerView'
+import AnalyticsView from './AnalyticsView'
 
 interface Booking {
   id: string
@@ -26,7 +27,9 @@ export default function AdminDashboardPage() {
   const supabase = createClient()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<'table' | 'tally' | 'scanner' | 'checked'>('table')
+  const [view, setView] = useState<'table' | 'tally' | 'scanner' | 'checked' | 'analytics'>('table')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(20)
   const [filterDate, setFilterDate] = useState('')
   const [filterSlot, setFilterSlot] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -61,6 +64,9 @@ export default function AdminDashboardPage() {
   }, [supabase, filterDate, filterSlot])
 
   useEffect(() => { fetchBookings() }, [fetchBookings])
+
+  // Reset pagination when filters change
+  useEffect(() => { setCurrentPage(1) }, [searchQuery, filterDate, filterSlot])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -251,11 +257,17 @@ export default function AdminDashboardPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
             Checked In
           </button>
+          <button className={`btn btn-sm ${view === 'analytics' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setView('analytics')}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+            Analytics
+          </button>
         </div>
       </div>
 
       {/* Content */}
-      {view === 'scanner' ? (
+      {view === 'analytics' ? (
+        <AnalyticsView bookings={filtered} />
+      ) : view === 'scanner' ? (
         <ScannerView />
       ) : view === 'checked' ? (
         <div className="fade-in">
@@ -358,7 +370,27 @@ export default function AdminDashboardPage() {
         </div>
       ) : loading ? (
         <div className="glass-card"><div className="skeleton" style={{ height: 400 }} /></div>
-      ) : view === 'table' ? (
+      ) : view === 'table' ? (() => {
+        const totalPages = Math.ceil(filtered.length / rowsPerPage)
+        const startIdx = (currentPage - 1) * rowsPerPage
+        const endIdx = Math.min(startIdx + rowsPerPage, filtered.length)
+        const pageData = filtered.slice(startIdx, endIdx)
+
+        const getPageNumbers = () => {
+          const pages: (number | '...')[] = []
+          if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i)
+          } else {
+            pages.push(1)
+            if (currentPage > 3) pages.push('...')
+            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i)
+            if (currentPage < totalPages - 2) pages.push('...')
+            pages.push(totalPages)
+          }
+          return pages
+        }
+
+        return (
         <div className="glass-card fade-in" style={{ padding: 0, overflow: 'hidden' }}>
           {filtered.length === 0 ? (
             <div className="empty-state">
@@ -368,6 +400,7 @@ export default function AdminDashboardPage() {
               <p>No bookings found</p>
             </div>
           ) : (
+            <>
             <div className="table-container">
               <table className="data-table">
                 <thead>
@@ -376,9 +409,17 @@ export default function AdminDashboardPage() {
                       <input
                         type="checkbox"
                         className="bulk-checkbox"
-                        checked={filtered.length > 0 && selectedIds.size === filtered.length}
-                        onChange={toggleSelectAll}
-                        title="Select all"
+                        checked={pageData.length > 0 && pageData.every(b => selectedIds.has(b.id))}
+                        onChange={() => {
+                          const pageIds = pageData.map(b => b.id)
+                          const allSelected = pageIds.every(id => selectedIds.has(id))
+                          setSelectedIds(prev => {
+                            const next = new Set(prev)
+                            pageIds.forEach(id => allSelected ? next.delete(id) : next.add(id))
+                            return next
+                          })
+                        }}
+                        title="Select page"
                       />
                     </th>
                     <th>#</th><th>Ref</th><th>Date</th><th>Time</th><th>Name</th><th>Qty</th>
@@ -386,7 +427,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((b, i) => (
+                  {pageData.map((b, i) => (
                     <tr key={b.id} className={selectedIds.has(b.id) ? 'row-selected' : ''}>
                       <td>
                         <input
@@ -396,7 +437,7 @@ export default function AdminDashboardPage() {
                           onChange={() => toggleSelect(b.id)}
                         />
                       </td>
-                      <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
+                      <td style={{ color: 'var(--text-muted)' }}>{startIdx + i + 1}</td>
                       <td><span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--accent)', fontSize: '0.8rem' }}>{b.booking_ref}</span></td>
                       <td>{formatDate(b.event_date, 'en')}</td>
                       <td>{formatTime(b.slot_time)}</td>
@@ -424,9 +465,51 @@ export default function AdminDashboardPage() {
                 </tbody>
               </table>
             </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <div className="pagination-info">
+                  Showing <strong>{startIdx + 1}–{endIdx}</strong> of <strong>{filtered.length}</strong> bookings
+                </div>
+                <div className="pagination-controls">
+                  <button className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(1)} title="First">
+                    «
+                  </button>
+                  <button className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} title="Previous">
+                    ‹
+                  </button>
+                  {getPageNumbers().map((p, i) =>
+                    p === '...' ? (
+                      <span key={`dots-${i}`} className="pagination-dots">…</span>
+                    ) : (
+                      <button key={p} className={`pagination-btn ${currentPage === p ? 'active' : ''}`} onClick={() => setCurrentPage(p as number)}>
+                        {p}
+                      </button>
+                    )
+                  )}
+                  <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} title="Next">
+                    ›
+                  </button>
+                  <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(totalPages)} title="Last">
+                    »
+                  </button>
+                </div>
+                <div className="pagination-size">
+                  <label>Rows:</label>
+                  <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1) }}>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
+              </div>
+            )}
+            </>
           )}
         </div>
-      ) : (
+        )
+      })() : (
         /* Tally View */
         <div className="tally-grid fade-in">
           {Object.keys(tallyGroups).length === 0 ? (
