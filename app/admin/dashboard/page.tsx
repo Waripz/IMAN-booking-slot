@@ -341,7 +341,7 @@ export default function AdminDashboardPage() {
                   <div className="table-container" style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
                     <table className="data-table">
                       <thead>
-                        <tr><th>#</th><th>Ref</th><th>Name</th><th>Phone</th><th>Area</th><th>Status</th></tr>
+                        <tr><th>#</th><th>Ref</th><th>Name</th><th>Qty</th><th>Phone</th><th>Area</th><th>Status</th></tr>
                       </thead>
                       <tbody>
                         {people.map((b, i) => (
@@ -349,6 +349,7 @@ export default function AdminDashboardPage() {
                             <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
                             <td><span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--accent)', fontSize: '0.8rem' }}>{b.booking_ref}</span></td>
                             <td style={{ fontWeight: 500 }}>{b.nama}</td>
+                            <td><span style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: (b.bilangan || 1) > 1 ? 'var(--accent)' : 'var(--text-primary)' }}>{b.bilangan || 1}</span></td>
                             <td>{b.no_telefon}</td>
                             <td>{b.daerah}, {b.negeri}</td>
                             <td>
