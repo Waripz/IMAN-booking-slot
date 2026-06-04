@@ -273,7 +273,7 @@ export default function AdminDashboardPage() {
         <div className="fade-in">
           {/* Breadcrumb */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontSize: '0.85rem' }}>
-            <button className="btn btn-ghost" onClick={() => { setCheckedDate(''); setCheckedSlot('') }} style={{ fontWeight: checkedDate ? 400 : 600, color: checkedDate ? 'var(--text-muted)' : 'var(--accent)' }}>Checked In ({bookings.filter(b => b.checked_in).length})</button>
+            <button className="btn btn-ghost" onClick={() => { setCheckedDate(''); setCheckedSlot('') }} style={{ fontWeight: checkedDate ? 400 : 600, color: checkedDate ? 'var(--text-muted)' : 'var(--accent)' }}>Checked In ({bookings.filter(b => b.checked_in).reduce((sum, b) => sum + (b.bilangan || 1), 0)})</button>
             {checkedDate && (
               <>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
@@ -292,8 +292,8 @@ export default function AdminDashboardPage() {
           {!checkedDate && (
             <div className="date-grid">
               {eventDates.map(date => {
-                const count = bookings.filter(b => b.checked_in && b.event_date === date).length
-                const total = bookings.filter(b => b.event_date === date).length
+                const count = bookings.filter(b => b.checked_in && b.event_date === date).reduce((sum, b) => sum + (b.bilangan || 1), 0)
+                const total = bookings.filter(b => b.event_date === date).reduce((sum, b) => sum + (b.bilangan || 1), 0)
                 const d = new Date(date + 'T00:00:00')
                 return (
                   <div key={date} className={`date-card ${count > 0 ? '' : ''}`} onClick={() => setCheckedDate(date)} style={{ cursor: 'pointer' }}>
@@ -312,8 +312,8 @@ export default function AdminDashboardPage() {
           {checkedDate && !checkedSlot && (
             <div className="slot-grid">
               {ALL_SLOT_TIMES.map(slot => {
-                const checked = bookings.filter(b => b.checked_in && b.event_date === checkedDate && b.slot_time === slot).length
-                const total = bookings.filter(b => b.event_date === checkedDate && b.slot_time === slot).length
+                const checked = bookings.filter(b => b.checked_in && b.event_date === checkedDate && b.slot_time === slot).reduce((sum, b) => sum + (b.bilangan || 1), 0)
+                const total = bookings.filter(b => b.event_date === checkedDate && b.slot_time === slot).reduce((sum, b) => sum + (b.bilangan || 1), 0)
                 return (
                   <div key={slot} className="slot-card" onClick={() => setCheckedSlot(slot)} style={{ cursor: 'pointer' }}>
                     <div className="slot-time">{formatTime(slot)}</div>
@@ -333,7 +333,7 @@ export default function AdminDashboardPage() {
               <div className="glass-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                   <h3 style={{ fontFamily: 'var(--font-heading)' }}>{formatDate(checkedDate, 'en')} &middot; {formatTime(checkedSlot)}</h3>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{people.filter(p => p.checked_in).length}/{people.length} checked in</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{people.filter(p => p.checked_in).reduce((sum, b) => sum + (b.bilangan || 1), 0)}/{people.reduce((sum, b) => sum + (b.bilangan || 1), 0)} checked in</span>
                 </div>
                 {people.length === 0 ? (
                   <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 32 }}>No bookings for this slot</p>
