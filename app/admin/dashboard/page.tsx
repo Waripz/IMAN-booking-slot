@@ -153,7 +153,7 @@ export default function AdminDashboardPage() {
   const todayPeople = bookings.filter(b => b.event_date === today).reduce((sum, b) => sum + (b.bilangan || 1), 0)
   const totalCapacity = eventDates.length * ALL_SLOT_TIMES.length * EVENT_CONFIG.maxPerSlot
   const capacityPercent = totalCapacity > 0 ? ((totalPeople / totalCapacity) * 100).toFixed(1) : '0'
-  const checkedInCount = bookings.filter(b => b.checked_in).length
+  const checkedInCount = bookings.filter(b => b.checked_in).reduce((sum, b) => sum + (b.bilangan || 1), 0)
 
   const tallyGroups = filtered.reduce((acc, b) => {
     const key = `${b.event_date}|${b.slot_time}`

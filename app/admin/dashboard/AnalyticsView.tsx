@@ -41,7 +41,7 @@ export default function AnalyticsView({ bookings, onFilterChange }: AnalyticsVie
     const avgAge = totalBookings > 0
       ? Math.round(bookings.reduce((s, b) => s + b.umur, 0) / totalBookings)
       : 0
-    const checkedIn = bookings.filter(b => b.checked_in).length
+    const checkedIn = bookings.filter(b => b.checked_in).reduce((sum, b) => sum + (b.bilangan || 1), 0)
 
     // Top negeri
     const negeriCounts: Record<string, number> = {}
